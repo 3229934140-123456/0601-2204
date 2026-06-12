@@ -1,0 +1,24 @@
+{
+  "name": "short-video-analytics-sdk",
+  "version": "1.0.0",
+  "description": "短视频数据分析 SDK - 提供账号表现和作品复盘能力",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "node dist/example.js"
+  },
+  "keywords": [
+    "short-video",
+    "analytics",
+    "sdk",
+    "douyin",
+    "data"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  }
+}
