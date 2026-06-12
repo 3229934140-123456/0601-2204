@@ -26,6 +26,10 @@ export class CommentService {
     }
 
     try {
+      const video = await this.adapter.getVideoDetail(params.workId);
+      if (!video) {
+        return errorResponse(ErrorCode.WORK_NOT_FOUND, '作品不存在');
+      }
       const keywords = await this.adapter.getCommentKeywords(params);
       return successResponse(keywords);
     } catch (error) {
@@ -41,6 +45,10 @@ export class CommentService {
     }
 
     try {
+      const video = await this.adapter.getVideoDetail(params.workId);
+      if (!video) {
+        return errorResponse(ErrorCode.WORK_NOT_FOUND, '作品不存在');
+      }
       const alerts = await this.adapter.getNegativeAlerts(params);
       return successResponse(alerts);
     } catch (error) {
@@ -56,6 +64,10 @@ export class CommentService {
     }
 
     try {
+      const video = await this.adapter.getVideoDetail(params.workId);
+      if (!video) {
+        return errorResponse(ErrorCode.WORK_NOT_FOUND, '作品不存在');
+      }
       const segments = await this.adapter.getHotSegments(params);
       return successResponse(segments);
     } catch (error) {
@@ -71,6 +83,10 @@ export class CommentService {
     }
 
     try {
+      const account = await this.adapter.getAccount(params.accountId);
+      if (!account) {
+        return errorResponse(ErrorCode.ACCOUNT_NOT_BOUND, '账号不存在');
+      }
       const comparisons = await this.adapter.getSeriesComparison(params);
       return successResponse(comparisons);
     } catch (error) {
@@ -95,6 +111,11 @@ export class CommentService {
     }
 
     try {
+      const video = await this.adapter.getVideoDetail(params.workId);
+      if (!video) {
+        return errorResponse(ErrorCode.WORK_NOT_FOUND, '作品不存在');
+      }
+
       const [keywords, negativeAlerts] = await Promise.all([
         this.adapter.getCommentKeywords(params),
         this.adapter.getNegativeAlerts(params),
@@ -144,6 +165,11 @@ export class CommentService {
     }
 
     try {
+      const video = await this.adapter.getVideoDetail(params.workId);
+      if (!video) {
+        return errorResponse(ErrorCode.WORK_NOT_FOUND, '作品不存在');
+      }
+
       const [keywords, negativeAlerts, hotSegments] = await Promise.all([
         this.adapter.getCommentKeywords(params),
         this.adapter.getNegativeAlerts(params),

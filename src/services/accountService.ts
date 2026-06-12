@@ -8,6 +8,7 @@ import {
   AccountMetricsParams,
 } from '../types/account';
 import { successResponse, errorResponse, ErrorCode } from '../utils/response';
+import { validateDateRange } from '../utils/helper';
 
 export class AccountService {
   private adapter: DataAdapter;
@@ -84,8 +85,16 @@ export class AccountService {
     if (!params.startDate || !params.endDate) {
       return errorResponse(ErrorCode.PARAM_ERROR, '开始日期和结束日期不能为空');
     }
+    const dateError = validateDateRange(params.startDate, params.endDate);
+    if (dateError) {
+      return errorResponse(ErrorCode.PARAM_ERROR, dateError);
+    }
 
     try {
+      const account = await this.adapter.getAccount(params.accountId);
+      if (!account) {
+        return errorResponse(ErrorCode.ACCOUNT_NOT_BOUND, '账号不存在');
+      }
       const metrics = await this.adapter.getAccountMetrics(params);
       return successResponse(metrics);
     } catch (error) {
@@ -111,8 +120,16 @@ export class AccountService {
     if (!params.startDate || !params.endDate) {
       return errorResponse(ErrorCode.PARAM_ERROR, '开始日期和结束日期不能为空');
     }
+    const dateError = validateDateRange(params.startDate, params.endDate);
+    if (dateError) {
+      return errorResponse(ErrorCode.PARAM_ERROR, dateError);
+    }
 
     try {
+      const account = await this.adapter.getAccount(params.accountId);
+      if (!account) {
+        return errorResponse(ErrorCode.ACCOUNT_NOT_BOUND, '账号不存在');
+      }
       const metrics = await this.adapter.getAccountMetrics(params);
       if (metrics.length === 0) {
         return successResponse({

@@ -10,7 +10,7 @@ import {
   AbnormalFluctuationParams,
 } from '../types/report';
 import { successResponse, errorResponse, ErrorCode } from '../utils/response';
-import { formatDate, getDateRange, getWeekRange } from '../utils/helper';
+import { formatDate, getDateRange, getWeekRange, validateDateRange } from '../utils/helper';
 
 export class ReportService {
   private adapter: DataAdapter;
@@ -25,6 +25,10 @@ export class ReportService {
     }
 
     try {
+      const account = await this.adapter.getAccount(params.accountId);
+      if (!account) {
+        return errorResponse(ErrorCode.ACCOUNT_NOT_BOUND, '账号不存在');
+      }
       const report = await this.adapter.getDailyReport(params);
       if (!report) {
         return errorResponse(ErrorCode.NOT_FOUND, '日报不存在');
@@ -41,6 +45,10 @@ export class ReportService {
     }
 
     try {
+      const account = await this.adapter.getAccount(params.accountId);
+      if (!account) {
+        return errorResponse(ErrorCode.ACCOUNT_NOT_BOUND, '账号不存在');
+      }
       const report = await this.adapter.getWeeklyReport(params);
       if (!report) {
         return errorResponse(ErrorCode.NOT_FOUND, '周报不存在');
@@ -60,8 +68,16 @@ export class ReportService {
     if (!params.startDate || !params.endDate) {
       return errorResponse(ErrorCode.PARAM_ERROR, '开始日期和结束日期不能为空');
     }
+    const dateError = validateDateRange(params.startDate, params.endDate);
+    if (dateError) {
+      return errorResponse(ErrorCode.PARAM_ERROR, dateError);
+    }
 
     try {
+      const account = await this.adapter.getAccount(params.accountId);
+      if (!account) {
+        return errorResponse(ErrorCode.ACCOUNT_NOT_BOUND, '账号不存在');
+      }
       const rankings = await this.adapter.getTopicRanking(params);
       return successResponse(rankings);
     } catch (error) {
@@ -78,8 +94,16 @@ export class ReportService {
     if (!params.startDate || !params.endDate) {
       return errorResponse(ErrorCode.PARAM_ERROR, '开始日期和结束日期不能为空');
     }
+    const dateError = validateDateRange(params.startDate, params.endDate);
+    if (dateError) {
+      return errorResponse(ErrorCode.PARAM_ERROR, dateError);
+    }
 
     try {
+      const account = await this.adapter.getAccount(params.accountId);
+      if (!account) {
+        return errorResponse(ErrorCode.ACCOUNT_NOT_BOUND, '账号不存在');
+      }
       const fluctuations = await this.adapter.getAbnormalFluctuations(params);
       return successResponse(fluctuations);
     } catch (error) {
@@ -95,10 +119,15 @@ export class ReportService {
       return errorResponse(ErrorCode.PARAM_ERROR, '账号ID不能为空');
     }
 
-    const days = params.days || 7;
-    const reports: DailyReport[] = [];
-
     try {
+      const account = await this.adapter.getAccount(params.accountId);
+      if (!account) {
+        return errorResponse(ErrorCode.ACCOUNT_NOT_BOUND, '账号不存在');
+      }
+
+      const days = params.days || 7;
+      const reports: DailyReport[] = [];
+
       for (let i = days - 1; i >= 0; i--) {
         const date = new Date();
         date.setDate(date.getDate() - i);
@@ -147,6 +176,10 @@ export class ReportService {
     const { startDate, endDate } = getDateRange(days);
 
     try {
+      const account = await this.adapter.getAccount(params.accountId);
+      if (!account) {
+        return errorResponse(ErrorCode.ACCOUNT_NOT_BOUND, '账号不存在');
+      }
       const [dailyReports, topics, alerts] = await Promise.all([
         this.getRecentDailyReports({ accountId: params.accountId, days }),
         this.adapter.getTopicRanking({
@@ -214,6 +247,11 @@ export class ReportService {
     }
 
     try {
+      const account = await this.adapter.getAccount(params.accountId);
+      if (!account) {
+        return errorResponse(ErrorCode.ACCOUNT_NOT_BOUND, '账号不存在');
+      }
+
       let reportData: any;
       let filename: string;
 
@@ -222,6 +260,9 @@ export class ReportService {
           accountId: params.accountId,
           date: params.date,
         });
+        if (result.code !== 0 || !result.data) {
+          return errorResponse(result.code, result.message);
+        }
         reportData = result.data;
         filename = `日报_${params.date || formatDate(new Date())}`;
       } else {
@@ -229,8 +270,11 @@ export class ReportService {
           accountId: params.accountId,
           weekOffset: params.weekOffset,
         });
+        if (result.code !== 0 || !result.data) {
+          return errorResponse(result.code, result.message);
+        }
         reportData = result.data;
-        filename = `周报_${result.data?.weekStart || '本周'}`;
+        filename = `周报_${result.data.weekStart}`;
       }
 
       let content: string;

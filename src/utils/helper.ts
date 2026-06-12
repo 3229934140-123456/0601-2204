@@ -64,6 +64,33 @@ export function formatPercent(value: number, decimals: number = 2): string {
   return (value * 100).toFixed(decimals) + '%';
 }
 
+const DATE_REG = /^\d{4}-\d{2}-\d{2}$/;
+
+export function isValidDate(dateStr: string): boolean {
+  if (!DATE_REG.test(dateStr)) return false;
+  const d = new Date(dateStr);
+  return !isNaN(d.getTime());
+}
+
+export function validateDateRange(startDate: string, endDate: string): string | null {
+  if (!DATE_REG.test(startDate)) {
+    return '开始日期格式不正确，应为 YYYY-MM-DD';
+  }
+  if (!DATE_REG.test(endDate)) {
+    return '结束日期格式不正确，应为 YYYY-MM-DD';
+  }
+  if (!isValidDate(startDate)) {
+    return '开始日期不是有效日期';
+  }
+  if (!isValidDate(endDate)) {
+    return '结束日期不是有效日期';
+  }
+  if (new Date(startDate) > new Date(endDate)) {
+    return '开始日期不能晚于结束日期';
+  }
+  return null;
+}
+
 export function generateId(prefix: string): string {
   return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).substr(2, 6)}`;
 }
